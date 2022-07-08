@@ -148,6 +148,15 @@ $media = $client->withFile($path, 'media')->post('cgi-bin/media/upload?type=imag
 $media = $client->withFileContents($contents, 'media', 'filename.png')->post('cgi-bin/media/upload?type=image');
 ```
 
+## 自定义 access_token
+
+```php
+$client->withAccessToken('access_token');
+$client->get('xxxx');
+$client->post('xxxx');
+//...
+```
+
 ## 预置参数的传递 <version-tag>6.4.0+</version-tag>
 
 在调用 API 的时候难免有的需要传递账号的一些信息，尤其是支付相关的 API，例如[查询订单](https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter3_1_2.shtml)：
@@ -161,20 +170,22 @@ $client->get('v3/pay/transactions/id/1217752501201407033233368018', [
 不得不把商户号这种基础信息再读取传递一遍，比较麻烦，设计了如下的简化方案：
 
 ```php
-$client->withMchid()->get('v3/pay/transactions/id/1217752501201407033233368018');
+$client->withMchId()->get('v3/pay/transactions/id/1217752501201407033233368018');
 ```
 
 原理就是 `with` + `配置 key`：
 
+> 注意: 如果配置key含有下划线的，如 `app_id` 应该转换为大写 `withAppId`
+
 ```php
-$client->withAppid()->post('/path/to/resources', [...]);
-$client->withAppid()->withMchid()->post('/path/to/resources', [...]);
+$client->withAppId()->post('/path/to/resources', [...]);
+$client->withAppId()->withMchid()->post('/path/to/resources', [...]);
 ```
 
 也可以自定义值：
 
 ```php
-$client->withAppid('12345678')->post('/path/to/resources', [...]);
+$client->withAppId('12345678')->post('/path/to/resources', [...]);
 // or
 $client->with('appid', '123456')->post('/path/to/resources', [...]);
 ```
@@ -182,7 +193,7 @@ $client->with('appid', '123456')->post('/path/to/resources', [...]);
 还可以设置别名：把 `appid` 作为参数 `mch_appid` 值使用：
 
 ```php
-$client->withAppidAs('mch_appid')->post('/path/to/resources', [...]);
+$client->withAppIdAs('mch_appid')->post('/path/to/resources', [...]);
 ```
 
 其它通用方法：

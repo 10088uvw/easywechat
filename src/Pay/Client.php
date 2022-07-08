@@ -36,6 +36,8 @@ use function str_starts_with;
  * @method ResponseInterface put(string $uri, array $options = [])
  * @method ResponseInterface patch(string $uri, array $options = [])
  * @method ResponseInterface delete(string $uri, array $options = [])
+ * @method HttpClientInterface withMchId(string $value = null)
+ * @method HttpClientInterface withMchIdAs(string $key)
  */
 class Client implements HttpClientInterface
 {
@@ -130,6 +132,11 @@ class Client implements HttpClientInterface
             }
         }
 
+        // 合并通过 withHeader 和 withHeaders 设置的信息
+        if (!empty($this->prependHeaders)) {
+            $options['headers'] = array_merge($this->prependHeaders, $options['headers'] ?? []);
+        }
+
         return new Response($this->client->request($method, $url, $options), throw: $this->throw);
     }
 
@@ -147,10 +154,13 @@ class Client implements HttpClientInterface
     }
 
     /**
-     * @param  array<string, mixed>  $arguments
+     * @param  array<int, mixed>  $arguments
      */
     public function __call(string $name, array $arguments): mixed
     {
+        if (\str_starts_with($name, 'with')) {
+            return $this->handleMagicWithCall($name, $arguments[0] ?? null);
+        }
         return $this->client->$name(...$arguments);
     }
 
